@@ -3,33 +3,24 @@ name: CI & Deploy
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
   workflow_dispatch:
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+  lint-and-deploy:
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Install Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install ruff
-      - run: ruff check .
 
-  deploy:
-    needs: lint
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to VDS
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VDS_HOST }}
-          username: ${{ secrets.VDS_USER }}
-          key: ${{ secrets.VDS_SSH_KEY }}
-          script: |
-            cd /root/poll-bot
-            git pull origin master
-            systemctl restart poll-bot
+      - name: Lint
+        run: pip install ruff && ruff check .
+
+      - name: Deploy
+        run: |
+          cd /root/poll-bot
+          git pull origin master
+          systemctl restart poll-bot
