@@ -174,7 +174,7 @@ async def on_vote(callback: CallbackQuery):
 
     if already_voted:
         # Toggle off — just remove, don't re-add
-        answer_text = f"Голос снят"
+        answer_text = "Голос снят"
     else:
         # Add new vote
         poll["votes"].setdefault(chosen_option, []).append({
